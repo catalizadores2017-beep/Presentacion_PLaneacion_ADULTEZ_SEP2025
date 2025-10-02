@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Planeación de la Subdirección para la Adultez</title>
+  <!-- Fuente (opcional, con fallback) -->
+  https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap
+  <style>
+    /* ===========================
+       CONFIGURACIÓN DE TEMA
+       =========================== */
+    :root{
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,.18);
+      --fg: 14 14 18;
+      --bg: 248 248 255;
+      --muted: 0 0 0 / .55;
+      --accent-h: 272; /* púrpura base */
+      --accent-s: 85%;
+      --accent-l: 58%;
+      --accent: hsl(var(--accent-h) var(--accent-s) var(--accent-l));
+      --accent-weak: hsl(var(--accent-h) 60% 70%);
+      --accent-strong: hsl(calc(var(--accent-h) - 10) 95% 55%);
+      --card: 255 255 255 / .68;
+      --glass-border: 255 255 255 / .35;
+      --gradient: linear-gradient(135deg,
+         hsl(var(--accent-h) 92% 62%) 0%,
+         hsl(calc(var(--accent-h) + 20) 80% 58%) 45%,
+         hsl(calc(var(--accent-h) - 20) 80% 58%) 100%);
+    }
+
+    [data-theme="dark"]{
+      --fg: 242 242 248;
+      --bg: 14 14 18;
+      --card: 22 22 28 / .5;
+      --glass-border: 255 255 255 / .12;
+      --shadow: 0 12px 36px rgba(0,0,0,.45);
+      --muted: 255 255 255 / .6;
+    }
+
+    /* ===========================
+       RESETEOS Y BASE
+       =========================== */
+    *{ box-sizing: border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: "Poppins",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
+      color: rgb(var(--fg));
+      background:
+        radial-gradient(1200px 1200px at 10% 10%, hsl(var(--accent-h) 90% 16% / .18), transparent 40%),
+        radial-gradient(1000px 900px at 90% 0%, hsl(calc(var(--accent-h)+30) 90% 16% / .18), transparent 40%),
+        rgb(var(--bg));
+      overflow: hidden; /* la vista principal gestiona el scroll */
+    }
+
+    /* ===========================
+       TOPBAR / CONTROLES
+       =========================== */
+    .topbar{
+      position: fixed; inset: 16px 16px auto 16px;
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(255,255,255,.06));
+      backdrop-filter: blur(10px);
+      border: 1px solid color-mix(in oklab, rgb(var(--glass-border)) 60%, transparent);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      z-index: 50;
+    }
+    .brand{
+      display:flex; align-items:center; gap:10px; padding-right:10px; border-right:1px dashed rgba(255,255,255,.15);
+    }
+    .logo{
+      width:28px; height:28px; border-radius:8px;
+      background: var(--gradient);
+      box-shadow: inset 0 0 0 2px rgba(255,255,255,.25), 0 6px 16px rgba(0,0,0,.25);
+      transform: rotate(8deg);
+    }
+    .title{
+      font-weight:800; letter-spacing:.3px;
+      background: var(--gradient); -webkit-background-clip:text; background-clip:text; color: transparent;
+      font-size: 14px; line-height:1;
+      text-transform: none;
+    }
+
+    .chips{
+      display:flex; gap:8px; flex-wrap: wrap;
+      padding: 0 6px;
+    }
+    .chip{
+      border:1px solid rgba(255,255,255,.22);
+      background: rgba(255,255,255,.08);
+      color: rgb(var(--fg));
+      padding: 6px 10px; border-radius: 999px; font-size: 12px;
+      display:flex; align-items:center; gap:6px; cursor: pointer;
+      transition: transform .12s ease, background .2s ease, border-color .2s ease;
+      user-select: none;
+    }
+    .chip:hover{ transform: translateY(-1px); background: rgba(255,255,255,.12); }
+    .chip.active{
+      background: var(--accent);
+      border-color: transparent;
+      color: white;
+      box-shadow: 0 6px 16px hsl(var(--accent-h) 85% 40% / .35);
+    }
+
+    .controls{ margin-left:auto; display:flex; align-items:center; gap:10px; }
+    .btn{
+      appearance: none; border:1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.08);
+      color: rgb(var(--fg));
+      padding: 8px 10px; border-radius: 12px;
+      display:flex; align-items:center; gap:8px; cursor: pointer;
+      transition: transform .12s ease, background .2s ease, border-color .2s ease;
+      font-size: 12px;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.12); }
+    .hue{ width:120px; accent-color: var(--accent); }
+
+    /* ===========================
+       ESCENARIO PRINCIPAL
+       =========================== */
+    .stage{
+      position: fixed; inset: 70px 16px 16px 16px; /* deja espacio a topbar */
+      border-radius: 22px;
+      overflow: hidden;
+      background: linear-gradient( to bottom right, rgba(255,255,255,.14), rgba(255,255,255,.06));
+      border: 1px solid color-mix(in oklab, rgb(var(--glass-border)) 60%, transparent);
+      box-shadow: var(--shadow);
+      display: grid;
+    }
+
+    /* Un módulo visible a la vez */
+    .module{
+      display:none;
+      grid-template-rows: auto 1fr;
+      height:100%;
+    }
+    .module.active{ display:grid; }
+
+    .module-header{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 18px 22px;
+      border-bottom: 1px dashed rgba(255,255,255,.16);
+      background: linear-gradient(180deg, rgba(255,255,255,.05), transparent);
+    }
+    .module-title{
+      display:flex; align-items:center; gap:14px;
+    }
+    .module-tag{
+      width:12px; height:12px; border-radius:50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 4px hsl(var(--accent-h) 90% 55% / .18);
+    }
+    .module h2{ margin:0; font-size: 22px; letter-spacing:.3px; }
+
+    .slides{
+      height:100%;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      scroll-padding: 24px;
+      padding: 20px;
+    }
+
+    .slide{
+      scroll-snap-align: start;
+      min-height: calc(100% - 16px);
+      border-radius: 20px;
+      border: 1px solid color-mix(in oklab, rgb(var(--glass-border)) 60%, transparent);
+      background:
+        radial-gradient(600px 400px at 80% -10%, hsl(var(--accent-h) 90% 62% / .12), transparent 40%),
+        rgba(255,255,255,.06);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      margin-bottom: 16px;
+      display: grid; grid-template-columns: 1.2fr .8fr; gap: 24px;
+    }
+
+    .slide .lead{
+      font-size: 30px; line-height: 1.15; font-weight: 800;
+      margin: 0 0 8px 0;
+      background: var(--gradient); -webkit-background-clip:text; background-clip:text; color: transparent;
+    }
+    .slide p{ margin: 0 0 10px 0; color: color-mix(in oklab, rgb(var(--fg)) 85%, rgb(128 128 128)); }
+
+    .card{
+      border-radius: 16px; padding: 16px;
+      border: 1px solid color-mix(in oklab, rgb(var(--glass-border)) 60%, transparent);
+      background: rgba(255,255,255,.06);
+    }
+    .list{
+      display:grid; gap:10px;
+    }
+    .list .item{
+      padding: 12px 12px; border-radius: 12px;
+      border: 1px dashed rgba(255,255,255,.18);
+      display:flex; align-items:center; gap:10px;
+      background: rgba(255,255,255,.05);
+    }
+    .dot{ width:10px; height:10px; border-radius:50%; background: var(--accent); flex: 0 0 auto; }
+
+    .notas{
+      display:none; margin-top: 16px; font-size: 12px; color: color-mix(in oklab, rgb(var(--fg)) 70%, rgb(140 140 150));
+      border-left: 3px solid var(--accent); padding-left: 12px;
+    }
+    .notas.show{ display:block; }
+
+    /* Progreso (puntos) */
+    .progress{
+      position: fixed; right: 24px; top: 50%; transform: translateY(-50%);
+      display: grid; gap: 10px; z-index: 40;
+    }
+    .prog-dot{
+      width: 10px; height: 10px; border-radius: 50%;
+      background: rgba(255,255,255,.22);
+      border: 1px solid rgba(255,255,255,.2);
+      cursor: pointer; transition: transform .12s ease, background .2s ease;
+    }
+    .prog-dot.active{
+      background: var(--accent);
+      transform: scale(1.15);
+      box-shadow: 0 0 0 6px hsl(var(--accent-h) 85% 55% / .15);
+    }
+
+    /* Modales: Mapa & Command Palette */
+    .overlay{
+      position: fixed; inset: 0; display:none; place-items: center; z-index: 100;
+      background: rgba(0,0,0,.4); backdrop-filter: blur(6px);
+    }
+    .overlay.show{ display: grid; }
+
+    .modal{
+      width: min(900px, 92vw);
+      max-height: 80vh; overflow: auto;
+      border-radius: 18px; padding: 16px;
+      border: 1px solid color-mix(in oklab, rgb(var(--glass-border)) 60%, transparent);
+      background: linear-gradient(180deg, rgba(255,255,255,.16), rgba(255,255,255,.08));
+      box-shadow: var(--shadow);
+    }
+    .grid{
+      display:grid; gap:12px; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+    .grid .tile{
+      border-radius: 14px; padding: 14px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.2);
+      cursor: pointer; transition: transform .12s ease, background .2s ease;
+    }
+    .grid .tile:hover{ transform: translateY(-3px); background: rgba(255,255,255,.1); }
+    .tile h4{ margin: 0 0 6px 0; }
+
+    .palette input[type="search"]{
+      width:100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.25);
+      background: rgba(255,255,255,.08); color: rgb(var(--fg)); outline: none;
+    }
+    .palette .results{ margin-top: 12px; display:grid; gap:8px; }
+    .palette .result{ padding: 10px 12px; border-radius: 10px; background: rgba(255,255,255,.06); cursor:pointer; }
+    .palette .result:hover{ background: rgba(255,255,255,.1); }
+
+    /* Accesibilidad */
+    .sr-only{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+
+    /* Impresión */
+    @media print{
+      body{ background: white; color: black; }
+      .topbar, .progress, .overlay { display: none !important; }
+      .stage{ position: static; inset: auto; box-shadow: none; border: none; }
+      .module{ display: block !important; page-break-after: always; }
+      .slide{ page-break-inside: avoid; background: white; box-shadow: none; border: 1px solid #ccc; }
+      .notas{ display: none !important; }
+    }
+
+    /* Responsivo */
+    @media (max-width: 900px){
+      .slide{ grid-template-columns: 1fr; }
+      .progress{ right: 12px; }
+    }
+
+    /* ======== PORTADA: Animación y estilo ======== */
+    .portada-titulo{
+      font-size: clamp(24px, 3.2vw, 38px);
+      margin: 8px 0 0 0;
+      background: var(--gradient);
+      -webkit-background-clip:text; background-clip:text; color: transparent;
+      letter-spacing: .3px; text-align:center;
+    }
+
+    .portada-hero{
+      display:grid; place-items:center;
+      background:
+        radial-gradient(700px 400px at 80% -10%, hsl(var(--accent-h) 90% 62% / .10), transparent 40%),
+        linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.04));
+      animation: gradientShift 14s ease-in-out infinite alternate;
+    }
+
+    .hero{
+      display:grid; gap: 10px; text-align:center; justify-items:center;
+      min-height: 58vh;
+    }
+    .hero .super{
+      font-size: 12px; letter-spacing: .18em; text-transform: uppercase;
+      color: color-mix(in oklab, rgb(var(--fg)) 70%, rgb(150 150 165));
+    }
+    .logo-xl{
+      width: 72px; height: 72px; border-radius: 20px;
+      background: var(--gradient);
+      box-shadow: inset 0 0 0 3px rgba(255,255,255,.22), 0 12px 28px rgba(0,0,0,.35);
+      transform: rotate(10deg);
+    }
+    .hero-title{
+      font-size: clamp(26px, 5.6vw, 56px); line-height: 1.05; margin: 6px 0 0 0;
+      background: var(--gradient);
+      -webkit-background-clip:text; background-clip:text; color: transparent;
+      font-weight: 800;
+    }
+    .hero-sub{
+      margin: 2px 0 8px 0;
+      color: color-mix(in oklab, rgb(var(--fg)) 82%, rgb(120 120 135));
+    }
+    .hero-actions{ display:flex; gap: 10px; align-items:center; justify-content:center; }
+    .btn-hero{
+      font-size: 14px; padding: 10px 14px; border-radius: 14px;
+      background: var(--accent); color: white; border: none; cursor: pointer;
+      box-shadow: 0 10px 20px hsl(var(--accent-h) 85% 40% / .35);
+    }
+    .btn-hero:hover{ transform: translateY(-1px); }
+    .hint{ font-size: 12px; color: color-mix(in oklab, rgb(var(--fg)) 70%, rgb(140 140 150)); }
+    kbd{
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.24);
+      border-radius: 6px; padding: 2px 6px; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+    }
+
+    /* Animaciones de entrada (stagger) */
+    .hero [data-anim]{ opacity: 0; transform: translateY(12px) scale(.985); filter: blur(3px); }
+    #portada.play-intro .hero [data-anim]{
+      animation: riseIn .8s cubic-bezier(.2,.8,.2,1) var(--d, 0s) forwards;
+    }
+
+    /* Fondo con desplazamiento sutil */
+    @keyframes gradientShift{
+      0% { background-position: 0% 50%, 0 0; }
+      100% { background-position: 100% 50%, 0 0; }
+    }
+
+    /* Keyframes */
+    @keyframes riseIn{
+      0% { opacity: 0; transform: translateY(14px) scale(.985); filter: blur(4px); }
+      60% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+      100% { opacity: 1; }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  #stageSaltar al contenido</a>
+
+  <!-- TOP BAR -->
+  <div class="topbar" aria-label="Barra superior">
+    <div class="brand" role="img" aria-label="Marca">
+      <div class="logo" title="Marca • morado creativo"></div>
+      <div class="title">PLANEACIÓN DE LA SUBDIRECCIÓN PARA LA ADULTEZ</div>
+    </div>
+
+    <div class="chips" id="chips" aria-label="Módulos (chips)"></div>
+
+    <div class="controls">
+      <label class="btn" title="Ajustar acento (matiz)">
+        🎨 <input id="hue" class="hue" type="range" min="0" max="360" value="272" />
+      </label>
+      <button id="toggleTheme" class="btn" title="Alternar tema">🌗 Tema</button>
+      <button id="openMap" class="btn" title="Mapa de módulos (M)">🗺️ Mapa</button>
+      <button id="openPalette" class="btn" title="Command Palette (Ctrl/Cmd + K)">⌘K</button>
+      <button id="printBtn" class="btn" title="Imprimir/Exportar PDF">🖨️ PDF</button>
+    </div>
+  </div>
+
+  <!-- ESCENARIO -->
+  <main id="stage" class="stage" tabindex="0" aria-live="polite" aria-label="Escenario de presentación">
+    <!-- MÓDULO: PORTADA (Inicio) -->
+    <section class="module active" id="portada" data-title="Inicio" style="--accent-h: 272;">
+      <header class="module-header" style="justify-content:center; border-bottom:none; background:transparent;">
+        <h1 class="portada-titulo" aria-label="Portada: Planeación de la Subdirección para la Adultez">
+          PLANEACIÓN DE LA SUBDIRECCIÓN PARA LA ADULTEZ
+        </h1>
+      </header>
+
+      <div class="slides portada-slides" data-module="Inicio" style="display:flex; align-items:center; justify-content:center;">
+        <article class="slide portada-hero" aria-label="Bienvenida">
+          <div class="hero">
+            <div class="super" data-anim style="--d: .0s;">Estrategia • 2025</div>
+            <div class="brandmark" data-anim style="--d: .08s;">
+              <div class="logo-xl" aria-hidden="true"></div>
+            </div>
+            <h2 class="hero-title" data-anim style="--d: .16s;">
+              Bienvenid<span style="letter-spacing:-.5px;">o</span>s
+            </h2>
+            <p class="hero-sub" data-anim style="--d: .26s;">
+              Usa <strong>← →</strong> para cambiar de módulo y <strong>↑ ↓</strong> para moverte por cada módulo.
+            </p>
+            <div class="hero-actions" data-anim style="--d: .36s;">
+              <button id="startBtn" class="btn btn-hero">▶ Empezar</button>
+              <span class="hint">o presiona <kbd>Enter</kbd></span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- MÓDULO: POLÍTICA PÚBLICA -->
+    <section class="module" id="politica-publica" data-title="Política Pública" style="--accent-h: 272;">
+      <header class="module-header">
+        <div class="module-title">
+          <span class="module-tag"></span>
+          <h2>Política Pública</h2>
+        </div>
+        <small>Usa ↑ ↓ para navegar por las diapositivas</small>
+      </header>
+      <div class="slides" data-module="Política Pública">
+        <article class="slide" data-title="Marco & Enfoque">
+          <div>
+            <h3 class="lead">Marco, enfoque y objetivos estratégicos</h3>
+            <p>En esta sección iremos integrando el <strong>marco normativo</strong>, enfoques diferenciales y objetivos.</p>
+            <div class="list">
+              <div class="item"><span class="dot"></span>Placeholder 1 — Ej: alineación con planes sectoriales.</div>
+              <div class="item"><span class="dot"></span>Placeholder 2 — Ej: metas de impacto y resultados.</div>
+              <div class="item"><span class="dot"></span>Placeholder 3 — Ej: indicadores claves (KPIs).</div>
+            </div>
+            <div class="notas">Notas (N): agrega aquí recordatorios del presentador para esta diapositiva.</div>
+          </div>
+          <aside class="card">
+            <h4 style="margin:0 0 8px 0;">Visual</h4>
+            <p>Reserva para infografías o diagramas (los añadimos cuando compartas el contenido).</p>
+          </aside>
+        </article>
+
+        <article class="slide" data-title="Gobernanza">
+          <div>
+            <h3 class="lead">Gobernanza, actores y articulación</h3>
+            <p>Mapa de actores, instancias y rutas de toma de decisión.</p>
+            <div class="list">
+              <div class="item"><span class="dot"></span>Consejos/mesas, roles y responsabilidades.</div>
+              <div class="item"><span class="dot"></span>Mecanismos de articulación interinstitucional.</div>
+              <div class="item"><span class="dot"></span>Riesgos y mitigación.</div>
+            </div>
+            <div class="notas">Notas del presentador para gobernanza.</div>
+          </div>
+          <aside class="card">
+            <h4 style="margin:0 0 8px 0;">Timeline</h4>
+            <p>Hito → Entregable → Resultados (tendremos una línea de tiempo visual).</p>
+          </aside>
+        </article>
+      </div>
+    </section>
+
+    <!-- MÓDULO: FORTALECIMIENTO TÉCNICO -->
+    <section class="module" id="fortalecimiento-tecnico" data-title="Fortalecimiento Técnico" style="--accent-h: 286;">
+      <header class="module-header">
+        <div class="module-title">
+          <span class="module-tag"></span>
+          <h2>Fortalecimiento Técnico</h2>
+        </div>
+        <small>Capacidades, herramientas y soporte</small>
+      </header>
+      <div class="slides" data-module="Fortalecimiento Técnico">
+        <article class="slide" data-title="Capacidades">
+          <div>
+            <h3 class="lead">Capacidades técnicas y roadmap</h3>
+            <p>Capacitaciones, estándares, soporte y transferencia de conocimiento.</p>
+            <div class="list">
+              <div class="item"><span class="dot"></span>Skill gaps y plan de cierre.</div>
+              <div class="item"><span class="dot"></span>Herramientas prioritarias.</div>
+            </div>
+            <div class="notas">Notas del presentador para capacidades técnicas.</div>
+          </div>
+          <aside class="card">
+            <h4 style="margin:0 0 8px 0;">Demo</h4>
+            <p>Espacio para GIFs/mini demos.</p>
+          </aside>
+        </article>
+      </div>
+    </section>
+
+    <!-- MÓDULO: GESTIÓN DEL CONOCIMIENTO -->
+    <section class="module" id="gestion-del-conocimiento" data-title="Gestión del Conocimiento" style="--accent-h: 258;">
+      <header class="module-header">
+        <div class="module-title">
+          <span class="module-tag"></span>
+          <h2>Gestión del Conocimiento</h2>
+        </div>
+        <small>Aprendizaje organizacional y activos de conocimiento</small>
+      </header>
+      <div class="slides" data-module="Gestión del Conocimiento">
+        <article class="slide" data-title="Modelo">
+          <div>
+            <h3 class="lead">Modelo de gestión y activos</h3>
+            <p>Repositorios, buenas prácticas, comunidades de práctica.</p>
+            <div class="list">
+              <div class="item"><span class="dot"></span>Taxonomía y metadatos.</div>
+              <div class="item"><span class="dot"></span>Curaduría y actualización.</div>
+            </div>
+            <div class="notas">Notas del presentador para conocimiento.</div>
+          </div>
+          <aside class="card">
+            <h4 style="margin:0 0 8px 0;">Mapa</h4>
+            <p>Espacio para un mapa visual de activos (lo integramos luego).</p>
+          </aside>
+        </article>
+      </div>
+    </section>
+
+    <!-- MÓDULO: OPTIMIZACIÓN DE PROCESOS -->
+    <section class="module" id="optimizacion-de-procesos" data-title="Optimización de Procesos" style="--accent-h: 310;">
+      <header class="module-header">
+        <div class="module-title">
+          <span class="module-tag"></span>
+          <h2>Optimización de Procesos</h2>
+        </div>
+        <small>Mejora continua y automatización</small>
+      </header>
+      <div class="slides" data-module="Optimización de Procesos">
+        <article class="slide" data-title="Mapa de procesos">
+          <div>
+            <h3 class="lead">Mapa de procesos y cuellos de botella</h3>
+            <p>Identificación de oportunidades de simplificación y automatización.</p>
+            <div class="list">
+              <div class="item"><span class="dot"></span>Tiempo de ciclo y lead time.</div>
+              <div class="item"><span class="dot"></span>Desperdicios (Muda) y priorización.</div>
+            </div>
+            <div class="notas">Notas del presentador para procesos.</div>
+          </div>
+          <aside class="card">
+            <h4 style="margin:0 0 8px 0;">Indicadores</h4>
+            <p>Área para KPI de eficiencia (gráficos más adelante).</p>
+          </aside>
+        </article>
+      </div>
+    </section>
+
+    <!-- MÓDULO: INNOVACIÓN -->
+    <section class="module" id="innovacion" data-title="Innovación" style="--accent-h: 340;">
+      <header class="module-header">
+        <div class="module-title">
+          <span class="module-tag"></span>
+          <h2>Innovación</h2>
+        </div>
+        <small>Exploración, prototipos y valor público</small>
+      </header>
+      <div class="slides" data-module="Innovación">
+        <article class="slide" data-title="Portafolio">
+          <div>
+            <h3 class="lead">Portafolio de innovación</h3>
+            <p>Descubrimiento, experimentos, pilotos y escalamiento.</p>
+            <div class="list">
+              <div class="item"><span class="dot"></span>Desafíos prioritarios.</div>
+              <div class="item"><span class="dot"></span>TRLs / Madurez y criterios de éxito.</div>
+            </div>
+            <div class="notas">Notas del presentador para innovación.</div>
+          </div>
+          <aside class="card">
+            <h4 style="margin:0 0 8px 0;">Canvas</h4>
+            <p>Espacio para canvas de hipótesis/valor (lo agregamos con tu contenido).</p>
+          </aside>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <!-- PROGRESO (puntos por slide del módulo activo) -->
+  <div class="progress" id="progress" aria-label="Progreso por diapositivas"></div>
+
+  <!-- MAPA DE MÓDULOS -->
+  <div class="overlay" id="mapOverlay" aria-modal="true" role="dialog" aria-label="Mapa de módulos">
+    <div class="modal">
+      <h3 style="margin-top:4px;">Mapa de módulos</h3>
+      <div class="grid" id="mapGrid"></div>
+    </div>
+  </div>
+
+  <!-- COMMAND PALETTE -->
+  <div class="overlay" id="paletteOverlay" aria-modal="true" role="dialog" aria-label="Command Palette">
+    <div class="modal palette">
+      <input type="search" id="paletteSearch" placeholder="Buscar: módulo o diapositiva… (Esc para cerrar)" />
+      <div class="results" id="paletteResults"></div>
+    </div>
+  </div>
+
+  <script>
+    // ===========================
+    // UTILIDADES
+    // ===========================
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => [...document.querySelectorAll(sel)];
+    const byId = id => document.getElementById(id);
+
+    const modules = $$('.module');
+    let activeModuleIndex = 0;
+
+    // Restaurar estado previo (módulo, tema y hue)
+    const saved = JSON.parse(localStorage.getItem('deck-state') || '{}');
+    if (typeof saved.hue === 'number') document.documentElement.style.setProperty('--accent-h', saved.hue);
+    if (saved.theme) document.body.setAttribute('data-theme', saved.theme);
+
+    // ===========================
+    // PERSISTENCIA (única función)
+    // ===========================
+    function currentSlideIndex(){
+      const sc = slidesContainer();
+      const slides = getSlides();
+      let closest = 0, min = Infinity;
+      slides.forEach((s, i) => {
+        const rect = s.getBoundingClientRect();
+        const dist = Math.abs(rect.top - (sc.getBoundingClientRect().top + 20));
+        if (dist < min){ min = dist; closest = i; }
+      });
+      return closest;
+    }
+    function persistState(){
+      try{
+        const state = JSON.parse(localStorage.getItem('deck-state') || '{}');
+        state.moduleIndex = typeof activeModuleIndex === 'number' ? activeModuleIndex : state.moduleIndex || 0;
+        // slideIndex solo si hay slides (por seguridad al iniciar)
+        state.slideIndex = (function(){
+          try{ return currentSlideIndex(); } catch(e){ return state.slideIndex || 0; }
+        })();
+        state.theme = document.body.getAttribute('data-theme') || state.theme || 'dark';
+        const hueControl = byId('hue');
+        state.hue = hueControl ? parseInt(hueControl.value) : state.hue || 272;
+        // bandera de intro (si ya ha sido reproducida)
+        state.introPlayed = typeof saved.introPlayed === 'boolean' ? saved.introPlayed : state.introPlayed || false;
+        localStorage.setItem('deck-state', JSON.stringify(state));
+      }catch(e){/* noop */}
+    }
+
+    // ===========================
+    // CREAR CHIPS DE MÓDULOS
+    // ===========================
+    const chips = byId('chips');
+    modules.forEach((mod, idx) => {
+      const chip = document.createElement('button');
+      chip.className = 'chip';
+      chip.dataset.idx = idx;
+      chip.innerHTML = `<span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block"></span>
+                        ${mod.dataset.title}`;
+      chip.addEventListener('click', () => goToModule(idx));
+      chips.appendChild(chip);
+      if (mod.classList.contains('active')) activeModuleIndex = idx;
+    });
+
+    function setActiveChip(idx){
+      $$('#chips .chip').forEach((c,i)=> c.classList.toggle('active', i===idx));
+    }
+
+    // ===========================
+    // PROGRESO (puntos)
+    // ===========================
+    const progress = byId('progress');
+    function renderProgress(){
+      progress.innerHTML = '';
+      const slides = modules[activeModuleIndex].querySelectorAll('.slide');
+      slides.forEach((s, i) => {
+        const d = document.createElement('div');
+        d.className = 'prog-dot';
+        d.title = s.dataset.title || `Diapositiva ${i+1}`;
+        d.addEventListener('click', ()=> goToSlide(i));
+        progress.appendChild(d);
+      });
+      highlightProgress();
+    }
+    function highlightProgress(){
+      const idx = currentSlideIndex();
+      $$('#progress .prog-dot').forEach((d,i)=> d.classList.toggle('active', i===idx));
+    }
+
+    function getSlides(){
+      return modules[activeModuleIndex].querySelectorAll('.slide');
+    }
+    function slidesContainer(){
+      return modules[activeModuleIndex].querySelector('.slides');
+    }
+
+    // ===========================
+    // NAVEGACIÓN
+    // ===========================
+    function goToModule(idx){
+      modules.forEach((m,i)=>{
+        m.classList.toggle('active', i===idx);
+      });
+      activeModuleIndex = idx;
+
+      // Cambiar matiz global según el módulo (si define --accent-h)
+      const styleHue = modules[idx].style.getPropertyValue('--accent-h');
+      if (styleHue) {
+        document.documentElement.style.setProperty('--accent-h', parseInt(styleHue));
+        const hueInput = byId('hue');
+        if (hueInput) hueInput.value = parseInt(styleHue);
+      }
+
+      setActiveChip(idx);
+      renderProgress();
+      slidesContainer().scrollTo({ top: 0, behavior: 'auto' });
+      persistState();
+    }
+
+    function goToSlide(idx){
+      const sc = slidesContainer();
+      const slide = getSlides()[idx];
+      sc.scrollTo({ top: slide.offsetTop - sc.firstElementChild.offsetTop - 8, behavior: 'smooth' });
+      setTimeout(highlightProgress, 220);
+      persistState();
+    }
+
+    // Eventos de scroll para resaltar progreso
+    modules.forEach((m, i) => {
+      const sc = m.querySelector('.slides');
+      sc.addEventListener('scroll', () => {
+        if (i === activeModuleIndex) highlightProgress();
+      });
+    });
+
+    // Teclado global
+    window.addEventListener('keydown', (e)=>{
+      const isInput = ['INPUT','TEXTAREA'].includes(e.target.tagName);
+      if (isInput) return;
+
+      // Navegación por módulos
+      if (e.key === 'ArrowRight'){
+        e.preventDefault();
+        goToModule(Math.min(activeModuleIndex + 1, modules.length - 1));
+      }
+      if (e.key === 'ArrowLeft'){
+        e.preventDefault();
+        goToModule(Math.max(activeModuleIndex - 1, 0));
+      }
+      // Navegación por diapositivas (vertical)
+      if (e.key === 'ArrowDown'){
+        e.preventDefault();
+        const idx = currentSlideIndex();
+        goToSlide(Math.min(idx + 1, getSlides().length - 1));
+      }
+      if (e.key === 'ArrowUp'){
+        e.preventDefault();
+        const idx = currentSlideIndex();
+        goToSlide(Math.max(idx - 1, 0));
+      }
+      // Notas
+      if (e.key.toLowerCase() === 'n'){
+        e.preventDefault();
+        toggleNotas();
+      }
+      // Mapa
+      if (e.key.toLowerCase() === 'm'){
+        e.preventDefault();
+        openMap();
+      }
+      // Command palette
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){
+        e.preventDefault();
+        openPalette();
+      }
+      // Imprimir
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p'){
+        persistState(); // guardar antes de imprimir
+      }
+      // Enter en portada
+      if (document.querySelector('#portada.module.active') && e.key === 'Enter'){
+        e.preventDefault();
+        goToModule(1);
+      }
+      // Escape para cerrar overlays
+      if (e.key === 'Escape'){
+        closeMap();
+        closePalette();
+      }
+    });
+
+    function toggleNotas(){
+      const idx = currentSlideIndex();
+      const slide = getSlides()[idx];
+      const notas = slide.querySelector('.notas');
+      if (notas){
+        notas.classList.toggle('show');
+      }
+    }
+
+    // ===========================
+    // MAPA DE MÓDULOS (M)
+    // ===========================
+    const mapOverlay = byId('mapOverlay');
+    const mapGrid = byId('mapGrid');
+
+    function openMap(){
+      mapGrid.innerHTML = '';
+      modules.forEach((m, i)=>{
+        const slides = m.querySelectorAll('.slide');
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.innerHTML = `<h4>${m.dataset.title}</h4>
+          <small>${slides.length} diapositiva(s)</small>`;
+        tile.addEventListener('click', ()=>{
+          closeMap();
+          goToModule(i);
+        });
+        mapGrid.appendChild(tile);
+      });
+      mapOverlay.classList.add('show');
+    }
+    function closeMap(){ mapOverlay.classList.remove('show'); }
+    mapOverlay.addEventListener('click', (e)=>{ if (e.target === mapOverlay) closeMap(); });
+
+    byId('openMap').addEventListener('click', openMap);
+
+    // ===========================
+    // COMMAND PALETTE (Ctrl/Cmd + K)
+    // ===========================
+    const paletteOverlay = byId('paletteOverlay');
+    const paletteSearch = byId('paletteSearch');
+    const paletteResults = byId('paletteResults');
+
+    function buildPaletteIndex(){
+      const idx = [];
+      modules.forEach((m, mi)=>{
+        const mTitle = m.dataset.title;
+        idx.push({ type:'module', label: mTitle, moduleIndex: mi });
+        m.querySelectorAll('.slide').forEach((s, si)=>{
+          idx.push({ type:'slide', label: `${mTitle} › ${s.dataset.title || 'Diapositiva '+(si+1)}`, moduleIndex: mi, slideIndex: si });
+        });
+      });
+      return idx;
+    }
+
+    const paletteIndex = buildPaletteIndex();
+
+    function openPalette(){
+      paletteOverlay.classList.add('show');
+      paletteSearch.value = '';
+      renderPaletteResults(paletteIndex);
+      setTimeout(()=> paletteSearch.focus(), 50);
+    }
+    function closePalette(){ paletteOverlay.classList.remove('show'); }
+    paletteOverlay.addEventListener('click', (e)=>{ if (e.target === paletteOverlay) closePalette(); });
+    byId('openPalette').addEventListener('click', openPalette);
+
+    function renderPaletteResults(items){
+      paletteResults.innerHTML = '';
+      items.forEach((item)=>{
+        const div = document.createElement('div');
+        div.className = 'result';
+        div.textContent = (item.type === 'module' ? 'Módulo: ' : 'Slide: ') + item.label;
+        div.addEventListener('click', ()=>{
+          closePalette();
+          goToModule(item.moduleIndex);
+          if (typeof item.slideIndex === 'number'){
+            setTimeout(()=> goToSlide(item.slideIndex), 50);
+          }
+        });
+        paletteResults.appendChild(div);
+      });
+    }
+    paletteSearch.addEventListener('input', ()=>{
+      const q = paletteSearch.value.trim().toLowerCase();
+      if (!q){ renderPaletteResults(paletteIndex); return; }
+      const filtered = paletteIndex.filter(it => it.label.toLowerCase().includes(q));
+      renderPaletteResults(filtered);
+    });
+
+    // ===========================
+    // CONTROLES: Tema, Hue, PDF
+    // ===========================
+    const toggleThemeBtn = byId('toggleTheme');
+    toggleThemeBtn.addEventListener('click', ()=>{
+      const curr = document.body.getAttribute('data-theme') || 'dark';
+      const next = curr === 'dark' ? 'light' : 'dark';
+      document.body.setAttribute('data-theme', next);
+      persistState();
+    });
+
+    const hueInput = byId('hue');
+    hueInput.addEventListener('input', (e)=>{
+      const val = parseInt(e.target.value);
+      document.documentElement.style.setProperty('--accent-h', val);
+      // no alteramos el matiz por-módulo; solo el global
+      persistState();
+    });
+
+    byId('printBtn').addEventListener('click', ()=>{ persistState(); window.print(); });
+
+    // ===========================
+    // PORTADA: animación y CTA
+    // ===========================
+    const portadaEl = byId('portada');
+    // reproducir animación si no se ha mostrado antes
+    if (portadaEl && !saved.introPlayed) {
+      setTimeout(()=> portadaEl.classList.add('play-intro'), 60);
+      // marcamos como reproducida tras ~1.5s
+      setTimeout(()=> {
+        saved.introPlayed = true;
+        localStorage.setItem('deck-state', JSON.stringify(saved));
+      }, 1500);
+    }
+
+    const startBtn = byId('startBtn');
+    if (startBtn){
+      startBtn.addEventListener('click', ()=> goToModule(1)); // siguiente módulo (Política Pública)
+    }
+
+    // ===========================
+    // INICIALIZACIÓN
+    // ===========================
+    function initialSetup(){
+      // Chip activo inicial y progreso
+      setActiveChip(activeModuleIndex);
+      renderProgress();
+
+      // Si ya se había navegado antes y ya se mostró la intro,
+      // restaurar módulo y diapositiva previos.
+      if (typeof saved.moduleIndex === 'number' && saved.introPlayed){
+        goToModule(Math.min(saved.moduleIndex, modules.length - 1));
+        if (typeof saved.slideIndex === 'number'){
+          setTimeout(()=> goToSlide(saved.slideIndex), 10);
+        }
+      }
+    }
+    initialSetup();
+  </script>
+</body>
